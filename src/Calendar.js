@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import './Calendar.css';
 
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-
-function Calendar() {
+function Calendar({ t }) {
   const [current, setCurrent] = useState(new Date());
   const [selected, setSelected] = useState(new Date());
 
@@ -11,6 +9,15 @@ function Calendar() {
   const month = current.getMonth();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // 2023-01-01은 일요일이라, 0~6을 더하면 일~토 순서가 된다.
+  const weekdays = Array.from({ length: 7 }, (_, i) =>
+    new Date(2023, 0, 1 + i).toLocaleDateString(t.locale, { weekday: 'short' })
+  );
+  const title = new Date(year, month, 1).toLocaleDateString(t.locale, {
+    year: 'numeric',
+    month: 'long',
+  });
 
   const today = new Date();
   const isToday = (day) =>
@@ -57,18 +64,18 @@ function Calendar() {
   return (
     <div className="calendar">
       <div className="calendar-header">
-        <button type="button" onClick={goPrevMonth} aria-label="이전 달">
+        <button type="button" onClick={goPrevMonth} aria-label={t.prevMonth}>
           ‹
         </button>
         <button type="button" className="calendar-title" onClick={goToday}>
-          {year}년 {month + 1}월
+          {title}
         </button>
-        <button type="button" onClick={goNextMonth} aria-label="다음 달">
+        <button type="button" onClick={goNextMonth} aria-label={t.nextMonth}>
           ›
         </button>
       </div>
       <div className="calendar-grid">
-        {WEEKDAYS.map((d) => (
+        {weekdays.map((d) => (
           <div key={d} className="calendar-weekday">
             {d}
           </div>
@@ -77,8 +84,12 @@ function Calendar() {
       </div>
       {selected && (
         <p className="calendar-selected-label">
-          선택한 날짜: {selected.getFullYear()}년 {selected.getMonth() + 1}월{' '}
-          {selected.getDate()}일
+          {t.selectedDate}:{' '}
+          {selected.toLocaleDateString(t.locale, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
         </p>
       )}
     </div>

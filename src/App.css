@@ -9,6 +9,39 @@
   box-sizing: border-box;
 }
 
+.App {
+  position: relative;
+}
+
+.lang-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #5c6270;
+}
+
+.lang-toggle button {
+  border: none;
+  background: none;
+  color: #aaa;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.lang-toggle button:hover {
+  background-color: #3a3f4b;
+}
+
+.lang-toggle button.active {
+  background-color: #61dafb;
+  color: #282c34;
+}
+
 .app-layout {
   display: flex;
   align-items: flex-start;

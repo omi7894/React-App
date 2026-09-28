@@ -1,17 +1,35 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
 import Calendar from './Calendar';
+import { messages } from './i18n';
+
+function getInitialLang() {
+  try {
+    const saved = localStorage.getItem('lang');
+    if (saved === 'ko' || saved === 'en') return saved;
+  } catch {}
+  return 'ko';
+}
 
 function App() {
+  const [lang, setLang] = useState(getInitialLang);
+  const t = messages[lang];
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState('');
   const [draggingId, setDraggingId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editingText, setEditingText] = useState('');
   const dragItemIndex = useRef(null);
   const dragOverIndex = useRef(null);
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    try {
+      localStorage.setItem('lang', lang);
+    } catch {}
+  }, [lang]);
 
   useEffect(() => {
     fetch('/api/todos')
@@ -24,7 +42,7 @@ function App() {
         setLoading(false);
       })
       .catch(() => {
-        setError('서버에 연결할 수 없습니다. server 폴더에서 "npm start"를 실행해주세요.');
+        setError(true);
         setLoading(false);
       });
   }, []);
@@ -122,9 +140,25 @@ function App() {
 
   return (
     <div className="App">
+      <div className="lang-toggle" role="group" aria-label="Language">
+        <button
+          type="button"
+          className={lang === 'ko' ? 'active' : ''}
+          onClick={() => setLang('ko')}
+        >
+          KOR
+        </button>
+        <button
+          type="button"
+          className={lang === 'en' ? 'active' : ''}
+          onClick={() => setLang('en')}
+        >
+          ENG
+        </button>
+      </div>
       <div className="app-layout">
         <div className="calendar-panel">
-          <Calendar />
+          <Calendar t={t} />
         </div>
         <div className="todo-panel">
           <div className="todo-container">
@@ -134,17 +168,17 @@ function App() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="할 일을 입력하세요"
+                placeholder={t.placeholder}
               />
-              <button type="submit">추가</button>
+              <button type="submit">{t.add}</button>
             </form>
 
-            {error && <p className="error-message">{error}</p>}
+            {error && <p className="error-message">{t.serverError}</p>}
 
             {loading ? (
-              <p className="empty-message">불러오는 중...</p>
+              <p className="empty-message">{t.loading}</p>
             ) : todos.length === 0 ? (
-              <p className="empty-message">할 일이 없습니다.</p>
+              <p className="empty-message">{t.empty}</p>
             ) : (
               <ul className="todo-list">
                 {todos.map((todo, index) => (
@@ -194,14 +228,14 @@ function App() {
                           className="edit-button"
                           onClick={() => startEdit(todo)}
                         >
-                          수정
+                          {t.edit}
                         </button>
                         <button
                           type="button"
                           className="delete-button"
                           onClick={() => deleteTodo(todo.id)}
                         >
-                          삭제
+                          {t.delete}
                         </button>
                       </div>
                     )}
@@ -211,7 +245,7 @@ function App() {
             )}
 
             {todos.length > 0 && (
-              <p className="todo-count">남은 할 일: {remaining}개</p>
+              <p className="todo-count">{t.remaining(remaining)}</p>
             )}
           </div>
         </div>
